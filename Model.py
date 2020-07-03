@@ -91,8 +91,15 @@ class GameEngine:
                 self.update_objects()
 
                 self.timer -= 1
+                self.change_timer -= 1
                 if self.timer == 0:
                     self.ev_manager.post(EventTimesUp())
+                if self.change_timer == 0:
+                    for _player in self.players:
+                        _player.position = pg.Vector2(Const.PLAYER_INIT_POSITION[_player.player_id])
+                        _player.speed = Const.SPEED_ATTACK if _player == Const.SPEED_DEFENSE else Const.SPEED_DEFENSE
+                        _player.attacking = not (_player.attacking)
+                    self.change_timer = min(self.timer, Const.CHANGE_LENGTH)
             elif cur_state == Const.STATE_ENDGAME:
                 self.update_endgame()
 
@@ -141,15 +148,19 @@ class GameEngine:
         self.running = True
         self.ev_manager.post(EventInitialize())
         self.timer = Const.GAME_LENGTH
+        self.change_timer = Const.CHANGE_LENGTH
         while self.running:
             self.ev_manager.post(EventEveryTick())
+            if self.players[0].position.distance_to(self.players[1].position) <= 2*Const.PLAYER_RADIUS:
+                self.ev_manager.post(EventQuit())
             self.clock.tick(Const.FPS)
 
 
 class Player:
     def __init__(self, player_id):
         self.player_id = player_id
-        self.position = Const.PLAYER_INIT_POSITION[player_id] # is a pg.Vector2
+        self.attacking = player_id
+        self.position = pg.Vector2(Const.PLAYER_INIT_POSITION[player_id]) # is a pg.Vector2
         self.speed = Const.SPEED_ATTACK if player_id == 1 else Const.SPEED_DEFENSE
 
     def move_direction(self, direction: str):

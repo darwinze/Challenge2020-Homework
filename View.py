@@ -54,6 +54,19 @@ class GraphicalView:
         '''
         pg.display.set_caption(f'{Const.WINDOW_CAPTION} - FPS: {self.model.clock.get_fps():.2f}')
 
+    def display_timer(self):
+        font = pg.font.Font(None, 36)
+        text_surface = font.render('Game end in ' + str(self.model.timer//Const.FPS) + ' sec', 1, pg.Color('gray88'))
+        text_center = (Const.ARENA_SIZE[0] *6/8, Const.ARENA_SIZE[1] *1/8)
+        self.screen.blit(text_surface, text_surface.get_rect(center=text_center))
+
+        font = pg.font.Font(None, 36)
+        text_surface = font.render('Swap in ' + str(self.model.change_timer//Const.FPS) + ' sec', 1, pg.Color('gray88'))
+        text_center = (Const.ARENA_SIZE[0] *3/8, Const.ARENA_SIZE[1] *1/8)
+        self.screen.blit(text_surface, text_surface.get_rect(center=text_center))
+
+        pg.display.flip()
+
     def render_menu(self):
         # draw background
         self.screen.fill(Const.BACKGROUND_COLOR)
@@ -74,11 +87,24 @@ class GraphicalView:
         for player in self.model.players:
             center = list(map(int, player.position))
             pg.draw.circle(self.screen, Const.PLAYER_COLOR[player.player_id], center, Const.PLAYER_RADIUS)
+            
+            font = pg.font.Font(None, 36)
+            text = 'attack' if player.attacking else 'defense'
+            text_surface = font.render(text, 1, pg.Color('gray88'))
+            text_center = (Const.ARENA_SIZE[0] *(player.player_id*6 + 1)/8, Const.ARENA_SIZE[1] *5/6)
+            self.screen.blit(text_surface, text_surface.get_rect(center=text_center))
+        
+        self.display_timer()
 
         pg.display.flip()
 
     def render_stop(self):
-        pass
+        font = pg.font.Font(None, 36)
+        text_surface = font.render("Press [space] to resume", 1, pg.Color('gray88'))
+        text_center = (Const.ARENA_SIZE[0] / 2, Const.ARENA_SIZE[1] / 2)
+        self.screen.blit(text_surface, text_surface.get_rect(center=text_center))
+
+        pg.display.flip()
 
     def render_endgame(self):
         # draw background
